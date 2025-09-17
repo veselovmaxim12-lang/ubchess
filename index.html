@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Шахматы</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 30px;
+    }
+    #board {
+      width: 400px;
+      margin: auto;
+    }
+    #status {
+      margin-top: 15px;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/css/chessboard.min.css" />
+</head>
+<body>
+  <h1>Шахматная доска</h1>
+  <div id="board"></div>
+  <div id="status">Ход: белые</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/js/chessboard.min.js"></script>
+
+  <script>
+    const boardElement = document.getElementById("board");
+    const statusElement = document.getElementById("status");
+
+    const game = new Chess();
+
+    const onDragStart = (source, piece, position, orientation) => {
+      if (game.game_over()) return false;
+      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+        return false;
+      }
+    };
+
+    const onDrop = (source, target) => {
+      const move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+      });
+
+      if (move === null) return 'snapback';
+      updateStatus();
+    };
+
+    const updateStatus = () => {
+      let status = '';
+      let moveColor = game.turn() === 'w' ? 'белые' : 'чёрные';
+
+      if (game.in_checkmate()) {
+        status = 'Мат! Победа: ' + (game.turn() === 'w' ? 'чёрные' : 'белые');
+      } else if (game.in_draw()) {
+        status = 'Ничья';
+      } else {
+        status = 'Ход: ' + moveColor;
+        if (game.in_check()) {
+          status += ' (Шах!)';
+        }
+      }
+
+      statusElement.innerHTML = status;
+    };
+
+    const board = Chessboard('board', {
+      draggable: true,
+      position: 'start',
+      onDragStart: onDragStart,
+      onDrop: onDrop
+    });
+
+    updateStatus();
+  </script>
+</body>
+</html>
